@@ -28,13 +28,29 @@
  * Pytorch 1.12.1 Torchvision 0.13.1
  * GPU : NVIDA A100 (40G)
 
-* Required packages are listed in **environment.yaml**. You can install by running:
+### Installation 
+1. Install mmcv-full (v1.6.0)
+   
+   - We used version 1.6.0, but you should check the [documentation](https://mmcv.readthedocs.io/en/v1.7.0/get_started/installation.html) and install it according to the version of CUDA and torch you use.
+     
+       ```
+       pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.12/index.html
+       ```
 
-```
-conda env create -f environment.yaml
-conda activate PVLR
-```
+2. Install mmdet (v0.24.0), mmsegmentation (v0.24.1)
+   ```
+   pip install mmdet==0.24.0
+   pip install mmsegmentation==0.24.1
+   ```
 
+3. Clone the FRESHNet repository.
+   ```
+   git clone https://github.com/open-mmlab/mmdetection3d.git
+   cd mmdetection3d
+   pip install -v -e .
+   ```
+
+   
 ### Data Preparation
 * For convenience, we provide the features we used. You can find them here.
    * Thumos : [Google Drive](https://drive.google.com/file/d/1o8Jx0joiL9fO9Um3T-qu9SAi_fX5MpPV/view?usp=sharing)
