@@ -45,11 +45,21 @@
 
 3. Clone the FRESHNet repository.
    ```
-   git clone https://github.com/open-mmlab/mmdetection3d.git
+   git clone https://github.com/sejong-rcv/FRESH.git
    cd mmdetection3d
    pip install -v -e .
    ```
 
+4. Install MinkowskiEngine
+   - Users will also need to install Minkowski as the sparse convolution backend. If necessary please Follow the original [installation guide](https://github.com/NVIDIA/MinkowskiEngine#installation):
+     
+     ```
+     apt install build-essential python3-dev libopenblas-dev
+     ```
+  
+     ```
+     python3 setup.py install --user --force_cuda --blas=openblas
+     ```
    
 ### Data Preparation
 * For convenience, we provide the features we used. You can find them here.
