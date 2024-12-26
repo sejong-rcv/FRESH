@@ -67,17 +67,13 @@
    * Annet : [Google Drive](https://drive.google.com/file/d/1M9BWg3Jx17Jf7JsxQs_FvLQ23pxtkja7/view?usp=sharing)
 * The **feature** directory should be organized as follows:
 ~~~~
-├── PVLR
+├── FRESH
    ├── data
-      ├── thumos
-          ├── Thumos14_CLIP
-          ├── Thumos14-Annotations
-          ├── Thumos14reduced
-          └── Thumos14reduced-Annotations
-      ├── annet
-          ├── Anet_CLIP
-          ├── ActivityNet1.2-Annotations
-          └── ActivityNet1.3
+      ├── fresh_trainval
+          ├── calib
+          ├── depth
+          ├── image
+          └── label
 ~~~~
 * Considering the difficulty in achieving perfect reproducibility due to different model initializations depending on the experimental device (e.g., different GPU setup), we provide the initialized model parameters we used.
 
@@ -99,19 +95,17 @@
 
 ### Training
 ```
-OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES=0 python main.py --model-name PVLR
+bash tools/dist_train.sh configs/freshnet/tr3d-ff_agriculture-all_stem-vec.py 4 --work-dir work_dirs/
 ```
 
 ### Inference
 ```
-OMP_NUM_THREADS=1 CUDA_VISIBLE_DEVICES=0 python eval/inference.py --pretrained-ckpt output/ckpt/PVLR/Best_model.pkl
+bash tools/dist_test.sh configs/freshnet/tr3d-ff_agriculture-all_stem-vec.py work_dirs/ 4 --eval mAP
 ```
 ## References
 We referenced the repos below for the code.
-* [CLIP](https://github.com/openai/CLIP)
-* [CO2-Net](https://github.com/harlanhong/MM2021-CO2-Net)
-* [CoLA](https://github.com/zhang-can/CoLA)
-
+* [TR3D](https://github.com/SamsungLabs/tr3d.git)
+* [3D-Metrics](https://github.com/M-G-A/3D-Metrics.git)
 
 
 
