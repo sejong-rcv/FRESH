@@ -62,33 +62,55 @@
      ```
    
 ### Data Preparation
-* For convenience, we provide the features we used. You can find them here.
-   * Thumos : [Google Drive](https://drive.google.com/file/d/1o8Jx0joiL9fO9Um3T-qu9SAi_fX5MpPV/view?usp=sharing)
-   * Annet : [Google Drive](https://drive.google.com/file/d/1M9BWg3Jx17Jf7JsxQs_FvLQ23pxtkja7/view?usp=sharing)
-* The **feature** directory should be organized as follows:
+* For convenience, we provide the dataset we reconstructed. You can find them here.
+   * [Google Drive](https://drive.google.com/file/d/1ZkcB5bkoV3gpScAgrumJMwrX8zZdPjs4/view?usp=drive_link)
+     
 ~~~~
 ├── FRESH
    ├── data
-      ├── fresh_trainval
+      ├── papple_trainval
           ├── calib
           ├── depth
           ├── image
           └── label
 ~~~~
-* Considering the difficulty in achieving perfect reproducibility due to different model initializations depending on the experimental device (e.g., different GPU setup), we provide the initialized model parameters we used.
+* Generate dataset info files by running:
+  ```
+  python tools/create_data.py papple --root-path data/Papple --out-dir data/Papple --extra-tag papple
+  ```  
+
+* The directory structure after processing should be as follows.
+
+~~~~
+├── FRESH
+   ├── data
+      ├── papple_trainval
+          ├── calib
+          ├── depth
+          ├── image
+          └── label
+      ├── points
+      ├── papple_infos_train.pkl
+      ├── papple_infos_val.pkl
+      └── papple_infos_test.pkl
+~~~~
 
 * Please note that the parameters provided are the initial parameters before any training has been conducted.
-   * ckpt (thumos) : [Google Drive](https://drive.google.com/file/d/1iepClS4hohz2uH8Mfgajjr-y9-VFuITG/view?usp=drive_link)
-   * ckpt (annet) : [Google Drive](https://drive.google.com/file/d/1TzFzJL4k3odpYYwm9sx2iQN--oaf_x5B/view?usp=drive_link)
+   * ckpt : [Google Drive](https://drive.google.com/file/d/1iepClS4hohz2uH8Mfgajjr-y9-VFuITG/view?usp=drive_link)
 
 * The **checkpoint file**  should be organized as follows:
 ~~~~
-├── PVLR
-   ├── data
-      ├── ...
-      ├── ...
-      ├── init_thumos.pth
-      └── init_annet.pth
+├──  FRESHNet
+   ├── ckpt
+      ├── log
+      ├── log (json)
+      ├── config.py
+      ├── epoch_10.pth
+      ├── epoch_11.pth
+      ├── epoch_12.pth
+      ├── epoch_13.pth
+      ├── epoch_14.pth
+      └── epoch_15.pth
 ~~~~
 
 ## Run
