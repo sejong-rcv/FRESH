@@ -96,7 +96,7 @@
 ~~~~
 
 * Please note that the parameters provided are the initial parameters before any training has been conducted.
-   * ckpt : [Google Drive](https://drive.google.com/file/d/1iepClS4hohz2uH8Mfgajjr-y9-VFuITG/view?usp=drive_link)
+   * ckpt : [Google Drive](https://drive.google.com/file/d/16D612c1CR_NjUE9ZRaYfVkmsXcJ7JBr9/view?usp=drive_link)
 
 * The **checkpoint file**  should be organized as follows:
 ~~~~
