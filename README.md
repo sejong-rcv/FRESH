@@ -117,12 +117,12 @@
 
 ### Training
 ```
-bash tools/dist_train.sh configs/freshnet/tr3d-ff_agriculture-all_stem-vec.py 4 --work-dir work_dirs/
+bash tools/dist_train.sh configs/freshnet/fresh-ff_stem_direction.py 4 --work-dir work_dirs/
 ```
 
 ### Inference
 ```
-bash tools/dist_test.sh configs/freshnet/tr3d-ff_agriculture-all_stem-vec.py work_dirs/ 4 --eval mAP
+bash tools/dist_test.sh configs/freshnet/fresh-ff_stem_direction.py work_dirs/ 4 --eval mAP
 ```
 ## References
 We referenced the repos below for the code.
