@@ -15,6 +15,7 @@ import torch.nn as nn
 
 from mmcv.runner import BaseModule
 from mmdet3d.models.builder import BACKBONES
+import torch
 
 
 @BACKBONES.register_module()
@@ -119,12 +120,14 @@ class MinkResNet(BaseModule):
         x = self.conv1(x)
         x = self.norm1(x)
         x = self.relu(x)
+        
         if self.pool:
             x = self.maxpool(x)
         outs = []
         for i in range(self.num_stages):
             x = getattr(self, f'layer{i + 1}')(x)
             outs.append(x)
+
         return outs
 
 
@@ -139,14 +142,45 @@ class MinkFFResNet(MinkResNet):
         Returns:
             list[ME.SparseTensor]: Output sparse tensors.
         """
+
         x = self.conv1(x)
         x = self.norm1(x)
         x = self.relu(x)
         if self.pool:
             x = self.maxpool(x)
+
         x = f(x)
+
+        outs = []
+        for i in range(self.num_stages):
+            x = getattr(self, f'layer{i + 1}')(x)
+
+            outs.append(x)
+        
+        return outs
+
+
+@BACKBONES.register_module()
+class MinkFFOCCResNet(MinkResNet):
+    def forward(self, x_, f):
+        """Forward pass of ResNet.
+
+        Args:
+            x (ME.SparseTensor): Input sparse tensor.
+
+        Returns:
+            list[ME.SparseTensor]: Output sparse tensors.
+        """
+
+        x = self.conv1(x_)
+        x = self.norm1(x)
+        x = self.relu(x)
+        if self.pool:
+            x = self.maxpool(x)
+
         outs = []
         for i in range(self.num_stages):
             x = getattr(self, f'layer{i + 1}')(x)
             outs.append(x)
         return outs
+    

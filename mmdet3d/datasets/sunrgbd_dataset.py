@@ -88,6 +88,7 @@ class SUNRGBDDataset(Custom3DDataset):
                 - calib (dict, optional): Camera calibration info.
                 - ann_info (dict): Annotation info.
         """
+        
         info = self.data_infos[index]
         sample_idx = info['point_cloud']['lidar_idx']
         assert info['point_cloud']['lidar_idx'] == info['image']['image_idx']
@@ -99,6 +100,7 @@ class SUNRGBDDataset(Custom3DDataset):
             input_dict['file_name'] = pts_filename
 
         if self.modality['use_camera']:
+            #import pdb;pdb.set_trace()
             img_filename = osp.join(
                 osp.join(self.data_root, 'sunrgbd_trainval'),
                 info['image']['image_path'])
@@ -134,6 +136,7 @@ class SUNRGBDDataset(Custom3DDataset):
                 - pts_instance_mask_path (str): Path of instance masks.
                 - pts_semantic_mask_path (str): Path of semantic masks.
         """
+        #import pdb;pdb.set_trace()
         # Use index to get the annos, thus the evalhook could also use this api
         info = self.data_infos[index]
         if info['annos']['gt_num'] != 0:
@@ -150,6 +153,8 @@ class SUNRGBDDataset(Custom3DDataset):
 
         anns_results = dict(
             gt_bboxes_3d=gt_bboxes_3d, gt_labels_3d=gt_labels_3d)
+        
+        
 
         if self.modality['use_camera']:
             if info['annos']['gt_num'] != 0:

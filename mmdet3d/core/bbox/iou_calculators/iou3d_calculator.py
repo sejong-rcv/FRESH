@@ -197,6 +197,8 @@ class AxisAlignedBboxOverlaps3D(object):
         Returns:
             Tensor: shape (m, n) if ``is_aligned`` is False else shape (m,)
         """
+        bboxes1 = bboxes1[:, 0:6]
+        bboxes2 = bboxes2[:, 0:6]
         assert bboxes1.size(-1) == bboxes2.size(-1) == 6
         return axis_aligned_bbox_overlaps_3d(bboxes1, bboxes2, mode,
                                              is_aligned)

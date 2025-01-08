@@ -125,6 +125,46 @@ def draw_lidar_bbox3d_on_img(bboxes3d,
 
 
 # TODO: remove third parameter in all functions here in favour of img_metas
+# def draw_depth_bbox3d_on_img(bboxes3d,
+#                              raw_img,
+#                              calibs,
+#                              img_metas,
+#                              color=(0, 255, 0),
+#                              thickness=1):
+#     """Project the 3D bbox on 2D plane and draw on input image.
+
+#     Args:
+#         bboxes3d (:obj:`DepthInstance3DBoxes`, shape=[M, 7]):
+#             3d bbox in depth coordinate system to visualize.
+#         raw_img (numpy.array): The numpy array of image.
+#         calibs (dict): Camera calibration information, Rt and K.
+#         img_metas (dict): Used in coordinates transformation.
+#         color (tuple[int], optional): The color to draw bboxes.
+#             Default: (0, 255, 0).
+#         thickness (int, optional): The thickness of bboxes. Default: 1.
+#     """
+#     from mmdet3d.core.bbox import points_cam2img
+#     from mmdet3d.models import apply_3d_transformation
+
+#     img = raw_img.copy()
+#     img_metas = copy.deepcopy(img_metas)
+#     corners_3d = bboxes3d.corners
+#     num_bbox = corners_3d.shape[0]
+#     points_3d = corners_3d.reshape(-1, 3)
+#     points_3d /= 10
+
+#     # first reverse the data transformations
+#     xyz_depth = apply_3d_transformation(
+#         points_3d, 'DEPTH', img_metas, reverse=True)
+
+#     # project to 2d to get image coords (uv)
+#     uv_origin = points_cam2img(xyz_depth,
+#                                xyz_depth.new_tensor(img_metas['depth2img']))
+#     uv_origin = (uv_origin - 1).round()
+#     imgfov_pts_2d = uv_origin[..., :2].reshape(num_bbox, 8, 2).numpy()
+
+#     return plot_rect3d_on_img(img, num_bbox, imgfov_pts_2d, color, thickness)
+
 def draw_depth_bbox3d_on_img(bboxes3d,
                              raw_img,
                              calibs,
@@ -147,10 +187,13 @@ def draw_depth_bbox3d_on_img(bboxes3d,
     from mmdet3d.models import apply_3d_transformation
 
     img = raw_img.copy()
+    import pdb;pdb.set_trace()
     img_metas = copy.deepcopy(img_metas)
+    cam2img = img_metas['depth2img']
     corners_3d = bboxes3d.corners
     num_bbox = corners_3d.shape[0]
     points_3d = corners_3d.reshape(-1, 3)
+    points_3d /= 10
 
     # first reverse the data transformations
     xyz_depth = apply_3d_transformation(
@@ -204,3 +247,4 @@ def draw_camera_bbox3d_on_img(bboxes3d,
     imgfov_pts_2d = uv_origin[..., :2].reshape(num_bbox, 8, 2).numpy()
 
     return plot_rect3d_on_img(img, num_bbox, imgfov_pts_2d, color, thickness)
+

@@ -20,10 +20,14 @@ from .tr3d_ff import TR3DFF3DDetector
 from .votenet import VoteNet, VoteNetFF
 from .voxelnet import VoxelNet
 
+from .colorpoint_mink import ColorPointMink
+from .freshnet import FRESHFFDetector
+
 __all__ = [
     'Base3DDetector', 'VoxelNet', 'DynamicVoxelNet', 'MVXTwoStageDetector',
     'DynamicMVXFasterRCNN', 'MVXFasterRCNN', 'PartA2', 'VoteNet', 'H3DNet',
     'CenterPoint', 'SSD3DNet', 'ImVoteNet', 'SingleStageMono3DDetector',
     'FCOSMono3D', 'ImVoxelNet', 'GroupFree3DNet', 'PointRCNN', 'SMOKEMono3D',
-    'MinkSingleStage3DDetector', 'SASSD', 'TR3DFF3DDetector', 'VoteNetFF'
+    'MinkSingleStage3DDetector', 'SASSD', 'TR3DFF3DDetector', 'VoteNetFF',
+    'ColorPointMink', 'FRESHFFDetector'
 ]

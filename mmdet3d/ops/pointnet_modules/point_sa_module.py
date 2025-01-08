@@ -196,6 +196,8 @@ class BasePointSAModule(nn.Module):
         new_features_list = []
 
         # sample points, (B, num_point, 3), (B, num_point)
+        
+        #import pdb;pdb.set_trace()
         new_xyz, indices = self._sample_points(points_xyz, features, indices,
                                                target_xyz)
 

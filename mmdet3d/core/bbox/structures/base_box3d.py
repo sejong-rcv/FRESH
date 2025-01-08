@@ -41,12 +41,18 @@ class BaseInstance3DBoxes(object):
             device = tensor.device
         else:
             device = torch.device('cpu')
+        #import pdb;pdb.set_trace()
         tensor = torch.as_tensor(tensor, dtype=torch.float32, device=device)
         if tensor.numel() == 0:
             # Use reshape, so we don't end up creating a new tensor that
             # does not depend on the inputs (and consequently confuses jit)
             tensor = tensor.reshape((0, box_dim)).to(
                 dtype=torch.float32, device=device)
+        #import pdb;pdb.set_trace()
+        
+        box_dim = tensor.size(-1)
+        
+        #import pdb;pdb.set_trace()
         assert tensor.dim() == 2 and tensor.size(-1) == box_dim, tensor.size()
 
         if tensor.shape[-1] == 6:
@@ -561,6 +567,7 @@ class BaseInstance3DBoxes(object):
             assert points_clone.dim() == 3 and points_clone.shape[0] == 1
 
         boxes = boxes.to(points_clone.device).unsqueeze(0)
+        #import pdb;pdb.set_trace()
         box_idxs_of_pts = points_in_boxes_all(points_clone, boxes)
 
         return box_idxs_of_pts.squeeze(0)

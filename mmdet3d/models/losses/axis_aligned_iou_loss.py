@@ -1,6 +1,7 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import torch
 from torch import nn as nn
+import torch.nn.functional as F
 
 from mmdet.models.losses.utils import weighted_loss
 from ...core.bbox import AxisAlignedBboxOverlaps3D
@@ -66,6 +67,7 @@ def axis_aligned_diou_loss(pred, target):
 
     diou_loss = iou_loss + (r2 / c2)[:, 0]
 
+
     return diou_loss
 
 
@@ -81,7 +83,11 @@ class AxisAlignedIoULoss(nn.Module):
 
     def __init__(self, mode='iou', reduction='mean', loss_weight=1.0):
         super(AxisAlignedIoULoss, self).__init__()
-        self.loss = axis_aligned_iou_loss if mode == 'iou' else axis_aligned_diou_loss
+        print(mode)
+        if mode == 'iou':
+            self.loss = axis_aligned_iou_loss
+        else:
+            self.loss = axis_aligned_diou_loss
         assert reduction in ['none', 'sum', 'mean']
         self.reduction = reduction
         self.loss_weight = loss_weight

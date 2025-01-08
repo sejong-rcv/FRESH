@@ -33,6 +33,14 @@ except ImportError:
     from mmdet3d.utils import compat_cfg
 
 
+################# (@shlee) for save log
+def printsave(*a,mode='a',log_path=None):
+    with open(log_path, mode) as log_file:
+        print(*a)
+        print(*a,file=log_file)
+
+
+#import pdb;pdb.set_trace()
 def parse_args():
     parser = argparse.ArgumentParser(
         description='MMDet test (and eval) a model')
@@ -129,6 +137,8 @@ def parse_args():
 
 def main():
     args = parse_args()
+    # os.environ['MKL_NUM_THREADS'] = '4'
+    # os.environ['OMP_NUM_THREADS'] = '1'
 
     assert args.out or args.eval or args.format_only or args.show \
         or args.show_dir, \
@@ -224,7 +234,7 @@ def main():
     elif hasattr(dataset, 'PALETTE'):
         # segmentation dataset has `PALETTE` attribute
         model.PALETTE = dataset.PALETTE
-
+        
     if not distributed:
         model = MMDataParallel(model, device_ids=cfg.gpu_ids)
         outputs = single_gpu_test(model, data_loader)
@@ -253,7 +263,16 @@ def main():
             ]:
                 eval_kwargs.pop(key, None)
             eval_kwargs.update(dict(metric=args.eval, **kwargs))
-            print(dataset.evaluate(outputs, show=args.show, out_dir=args.show_dir, **eval_kwargs))
+            ### 원본
+            # print(dataset.evaluate(outputs, show=args.show, out_dir=args.show_dir, ckpt_pth=args.checkpoint, **eval_kwargs)) ## (shlee) default: print(dataset.evaluate(outputs, show=args.show, out_dir=args.show_dir, **eval_kwargs))
+            ### log 저장을 위한 코드
+            # import pdb;pdb.set_trace()
+            save_dir = "work_dirs/[final]output_log/" ## (@ shlee)
+            if not os.path.exists(save_dir):
+                os.makedirs(save_dir)
+            save_name = save_dir+"[{}]".format(cfg.data.test.ann_file.split("_")[-1].replace(".pkl",""))+"_".join(args.checkpoint.split("/")[-2:]).replace("pth","txt")
+            printsave(dataset.evaluate(outputs, show=args.show, out_dir=args.show_dir, ckpt_pth=args.checkpoint, **eval_kwargs),log_path=save_name)
+            print("Log saved in:", save_name)
 
 
 if __name__ == '__main__':

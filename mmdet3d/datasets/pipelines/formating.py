@@ -39,6 +39,10 @@ class DefaultFormatBundle(object):
             dict: The result dict contains the data that is formatted with
                 default bundle.
         """
+        # TODO ADD lwir ~ Collect3D -> [img, lwir] -> 2 C H W -> DC
+        if 'lwir' in results:
+            results['img'] = [results['img'], results['lwir']]
+            
         if 'img' in results:
             if isinstance(results['img'], list):
                 # process multiple imgs in single frame
@@ -127,7 +131,8 @@ class Collect3D(object):
             'box_type_3d', 'img_norm_cfg', 'pcd_trans',
             'sample_idx', 'pcd_scale_factor', 'pcd_rotation', 'pts_filename')
     """
-
+    # TODO Tjkim ADD 'lwir' ~ meta_keys
+    # TODO 230912 delete lwir
     def __init__(
         self,
         keys,

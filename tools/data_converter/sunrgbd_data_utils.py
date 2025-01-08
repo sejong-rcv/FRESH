@@ -37,6 +37,7 @@ class SUNRGBDInstance(object):
         data = line.split(' ')
         data[1:] = [float(x) for x in data[1:]]
         self.classname = data[0]
+        #import pdb;pdb.set_trace()
         self.xmin = data[1]
         self.ymin = data[2]
         self.xmax = data[1] + data[3]
@@ -75,8 +76,10 @@ class SUNRGBDData(object):
         self.split = split
         self.split_dir = osp.join(root_path, 'sunrgbd_trainval')
         self.classes = [
-            'bed', 'table', 'sofa', 'chair', 'toilet', 'desk', 'dresser',
-            'night_stand', 'bookshelf', 'bathtub'
+            'bathtub', 'bed', 'bookshelf', 'chair', 'desk', 'dresser',
+            'night_stand', 'sofa', 'table', 'toilet', 'box', 'door',
+            'counter', 'garbage_bin', 'sink', 'pillow','monitor',
+            'tv', 'lamp'
         ]
         self.cat2label = {cat: self.classes.index(cat) for cat in self.classes}
         self.label2cat = {

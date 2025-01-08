@@ -123,6 +123,7 @@ def test_indoor_eval():
         label2cat,
         box_type_3d=DepthInstance3DBoxes,
         box_mode_3d=Box3DMode.DEPTH)
+    #import pdb;pdb.set_trace()
 
     assert np.isclose(ret_value['cabinet_AP_0.25'], 0.666667)
     assert np.isclose(ret_value['bed_AP_0.25'], 1.0)
@@ -170,7 +171,7 @@ def test_indoor_eval_less_classes():
         np.array([1])
     }]
 
-    ret_value = indoor_eval(
+    indoor_eval(
         gt_annos,
         det_infos, [0.25, 0.5],
         label2cat,

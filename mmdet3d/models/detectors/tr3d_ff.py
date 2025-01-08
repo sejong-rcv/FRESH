@@ -9,6 +9,10 @@ except ImportError:
 
 import torch
 from torch import nn
+seed = 42
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
+
 from functools import partial
 
 from mmdet3d.core import bbox3d2result
@@ -16,6 +20,7 @@ from mmdet3d.models import DETECTORS, build_backbone, build_neck, build_head
 from mmdet3d.models.fusion_layers.point_fusion import point_sample
 from mmdet3d.core.bbox.structures import get_proj_mat_by_coord_type
 from .base import Base3DDetector
+from mmdet.models.utils import build_transformer
 
 
 @DETECTORS.register_module()
@@ -61,10 +66,9 @@ class TR3DFF3DDetector(Base3DDetector):
             ME.MinkowskiConvolution(256, 64, kernel_size=1, dimension=3),
             ME.MinkowskiBatchNorm(64),
             ME.MinkowskiReLU(inplace=True))
+        
 
     def init_weights(self, pretrained=None):
-        # self.img_backbone.init_weights()
-        # self.img_neck.init_weights()
         for param in self.img_backbone.parameters():
             param.requires_grad = False
         for param in self.img_neck.parameters():
@@ -104,13 +108,15 @@ class TR3DFF3DDetector(Base3DDetector):
                 aligned=True,
                 padding_mode='zeros',
                 align_corners=True))
-
+            
+        
         projected_features = torch.cat(projected_features, dim=0)
         projected_features = ME.SparseTensor(
             projected_features,
             coordinate_map_key=x.coordinate_map_key,
             coordinate_manager=x.coordinate_manager)
         projected_features = self.conv(projected_features)
+
         return projected_features + x
 
     def extract_feat(self, *args):
@@ -127,14 +133,15 @@ class TR3DFF3DDetector(Base3DDetector):
         """
         with torch.no_grad():
             x = self.img_backbone(img)
+
             img_features = self.img_neck(x)[0]
-        
+            
         coordinates, features = ME.utils.batch_sparse_collate(
             [(p[:, :3] / self.voxel_size, p[:, 3:]) for p in points],
             device=points[0].device)
+
         x = ME.SparseTensor(coordinates=coordinates, features=features)
-        x = self.backbone(x, partial(
-            self._f, img_features=img_features, img_metas=img_metas, img_shape=img.shape))
+        x = self.backbone(x, partial(self._f, img_features=img_features, img_metas=img_metas, img_shape=img.shape))
         x = self.neck(x)
         return x
 

@@ -20,7 +20,7 @@ from mmcv.ops.three_nn import three_nn
 from mmcv.ops.voxelize import Voxelization, voxelization
 
 from .dgcnn_modules import DGCNNFAModule, DGCNNFPModule, DGCNNGFModule
-from .norm import NaiveSyncBatchNorm1d, NaiveSyncBatchNorm2d
+from .norm import NaiveSyncBatchNorm1d, NaiveSyncBatchNorm2d, LN2d
 from .paconv import PAConv, PAConvCUDA
 from .pointnet_modules import (PAConvCUDASAModule, PAConvCUDASAModuleMSG,
                                PAConvSAModule, PAConvSAModuleMSG,
@@ -44,5 +44,5 @@ __all__ = [
     'get_compiler_version', 'assign_score_withk', 'get_compiling_cuda_version',
     'Points_Sampler', 'build_sa_module', 'PAConv', 'PAConvCUDA',
     'PAConvSAModuleMSG', 'PAConvSAModule', 'PAConvCUDASAModule',
-    'PAConvCUDASAModuleMSG', 'RoIPointPool3d'
+    'PAConvCUDASAModuleMSG', 'RoIPointPool3d', 'LN2d'
 ]

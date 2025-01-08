@@ -1,26 +1,65 @@
-ARG PYTORCH="1.12.1"
-ARG CUDA="11.3"
-ARG CUDNN="8"
+FROM nvidia/cuda:11.3.1-cudnn8-devel-ubuntu18.04
+LABEL maintainer "Geonhwa Son <ghson@rcv.sejong.ac.kr>"
 
-FROM pytorch/pytorch:${PYTORCH}-cuda${CUDA}-cudnn${CUDNN}-devel
+ENV LANG C.UTF-8
 
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/3bf863cc.pub \
-    && apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/machine-learning/repos/ubuntu1804/x86_64/7fa2af80.pub \
-    && apt-get update \
-    && apt-get install -y ffmpeg libsm6 libxext6 git ninja-build libglib2.0-0 libsm6 libxrender-dev libxext6
+ARG PYTHON_VERSION=
+ARG CONDA_ENV_NAME=
 
-# Install MMCV, MMDetection and MMSegmentation
-RUN pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.12.0/index.html
-RUN pip install mmdet==2.24.1
-RUN pip install mmsegmentation==0.24.1
+ARG DEBIAN_FRONTEND=noninteractive
 
-# Install MMDetection3D
-RUN git clone https://github.com/samsunglabs/tr3d.git /mmdetection3d
-WORKDIR /mmdetection3d
-RUN pip install --no-cache-dir -e .
+ENV TZ=Asia/Seoul
+RUN apt-get update && \
+    apt-get install -y tzdata
 
-# Install MinkowskiEngine
-RUN apt-get -y install libopenblas-dev
-RUN pip install -U git+https://github.com/NVIDIA/MinkowskiEngine@405b39cb7e68c2ec1b4ac8c4b4ca9fa6fcfcb2fc -v --no-deps \
-    --install-option="--blas=openblas" \
-    --install-option="--force_cuda"
+RUN apt-get update && apt-get install -y -qq --no-install-recommends \
+    apt-utils \
+    build-essential \
+    sudo \
+    cmake \
+    git \
+    curl \
+    vim \
+    ca-certificates \
+    libglib2.0-0 \
+    libjpeg-dev \
+    libpng-dev \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    ssh \
+    wget \
+    unzip \
+    tmux
+    
+RUN rm -rf /var/lib/apt/lists/*
+
+RUN curl -o /tmp/miniconda.sh -sSL http://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \
+    bash /tmp/miniconda.sh -bfp /usr/local && \
+    rm -rf /tmp/miniconda.sh
+
+RUN conda update -y conda && conda create --name ${CONDA_ENV_NAME} python=${PYTHON_VERSION}
+
+ENV PATH /usr/local/envs/$CONDA_ENV_NAME/bin:$PATH
+RUN echo "source activate ${CONDA_ENV_NAME}" >> ~/.bashrc
+RUN echo $PATH
+
+SHELL ["/bin/bash", "-c"]
+
+COPY requirements.txt /tmp/requirements.txt
+RUN source activate ${CONDA_ENV_NAME} && pip install --no-cache-dir -r tmp/requirements.txt
+
+RUN source activate ${CONDA_ENV_NAME} && pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
+    
+RUN adduser $USER_NAME -u $UID --quiet --gecos "" --disabled-password && \
+    echo "$USER_NAME ALL=(root) NOPASSWD:ALL" > /etc/sudoers.d/$USER_NAME && \
+    chmod 0440 /etc/sudoers.d/$USER_NAME
+
+USER $USER_NAME
+
+SHELL ["/bin/bash", "-c"]
+
+RUN echo "source activate ${CONDA_ENV_NAME}" > ~/.bashrc
+
+CMD ["/bin/bash"]
+ENV CONDA_DEFAULT_ENV ${CONDA_ENV_NAME}

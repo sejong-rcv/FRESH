@@ -4,6 +4,9 @@ from mmcv.cnn import ConvModule
 from mmcv.runner import BaseModule
 from torch import nn as nn
 from torch.nn import functional as F
+seed = 42
+torch.manual_seed(seed)
+torch.cuda.manual_seed_all(seed)
 
 from mmdet3d.core.bbox.structures import (get_proj_mat_by_coord_type,
                                           points_cam2img)
@@ -51,21 +54,22 @@ def point_sample(img_meta,
     Returns:
         torch.Tensor: NxC image features sampled by point coordinates.
     """
+    # import pdb;pdb.set_trace()
 
-    # apply transformation based on info in img_meta
-    points = apply_3d_transformation(
+    # apply transformation based on info in img_meta 
+    points = apply_3d_transformation( ## (@shlee)  point: (P,3) img_meta: ori_shape: (1300,1300,3)  => points: (P,3)
         points, coord_type, img_meta, reverse=True)
 
     # project points to camera coordinate
-    pts_2d = points_cam2img(points, proj_mat)
+    pts_2d = points_cam2img(points, proj_mat) ## (@shlee) proj_mat: (3,3)  pts_2d:(P,2)
 
     # img transformation: scale -> crop -> flip
     # the image is resized by img_scale_factor
-    img_coors = pts_2d[:, 0:2] * img_scale_factor  # Nx2
-    img_coors -= img_crop_offset
+    img_coors = pts_2d[:, 0:2] * img_scale_factor  # Nx2 ## (@shlee) img_scale_factor=[0.4615, 0.4615] , img_coors: (P,2)
+    img_coors -= img_crop_offset ##  (@shlee) img_coors: (P,2)
 
     # grid sample, the valid grid range should be in [-1,1]
-    coor_x, coor_y = torch.split(img_coors, 1, dim=1)  # each is Nx1
+    coor_x, coor_y = torch.split(img_coors, 1, dim=1)  # each is Nx1  ##  (@shlee) coor_x,coor_y: (P,2)
 
     if img_flip:
         # by default we take it as horizontal flip
@@ -80,7 +84,10 @@ def point_sample(img_meta,
                      dim=1).unsqueeze(0).unsqueeze(0)  # Nx2 -> 1x1xNx2
 
     # align_corner=True provides higher performance
-    mode = 'bilinear' if aligned else 'nearest'
+    mode = 'bilinear' if aligned else 'nearest' ## mode: bilinear
+    
+    
+    # import pdb;pdb.set_trace()
     point_features = F.grid_sample(
         img_features,
         grid,

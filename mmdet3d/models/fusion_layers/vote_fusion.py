@@ -38,6 +38,7 @@ class VoteFusion(nn.Module):
         """
         img_features = []
         masks = []
+        #import pdb;pdb.set_trace()
         for i, data in enumerate(
                 zip(imgs, bboxes_2d_rescaled, seeds_3d_depth, img_metas)):
             img, bbox_2d_rescaled, seed_3d_depth, img_meta = data
@@ -112,6 +113,8 @@ class VoteFusion(nn.Module):
                     [delta_u, delta_v,
                      torch.zeros_like(delta_v)], dim=-1).view(-1, 3)
                 imvote = imvote * z_cam.reshape(-1, 1)
+                
+                #import pdb;pdb.set_trace()
                 imvote = imvote @ torch.inverse(depth2img.t())
 
                 # apply transformation to lifted imvotes
@@ -197,4 +200,5 @@ class VoteFusion(nn.Module):
             img_features.append(img_feature)
             masks.append(mask)
 
+        #import pdb;pdb.set_trace()
         return torch.stack(img_features, 0), torch.stack(masks, 0)

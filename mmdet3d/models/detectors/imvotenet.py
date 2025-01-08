@@ -587,6 +587,7 @@ class ImVoteNet(Base3DDetector):
                     format(len(points), len(img_metas)))
 
             if num_augs == 1:
+                # import pdb;pdb.set_trace()
                 return self.simple_test(
                     points[0],
                     img_metas[0],

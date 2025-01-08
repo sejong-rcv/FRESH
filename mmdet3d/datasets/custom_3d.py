@@ -231,6 +231,17 @@ class Custom3DDataset(Dataset):
                 (example is None or
                     ~(example['gt_labels_3d']._data != -1).any()):
             return None
+        
+        # if example.get('lwir') is not None:
+        #     example['img'] = example['img'] 
+        # print(example.keys())
+        # print(example.get('img_fields'))
+        # imgs = [example[key] for key in example.get('img_fields')]
+        # print(example['img'])
+        # print(example['img'].shape)
+        # print(type(example['img']))
+        # print(example['lwir'].shape)
+        # print(type(example['lwir']))
         return example
 
     def prepare_test_data(self, index):
@@ -245,6 +256,7 @@ class Custom3DDataset(Dataset):
         input_dict = self.get_data_info(index)
         self.pre_pipeline(input_dict)
         example = self.pipeline(input_dict)
+            
         return example
 
     @classmethod
@@ -261,8 +273,13 @@ class Custom3DDataset(Dataset):
         Return:
             list[str]: A list of class names.
         """
+        #import pdb;pdb.set_trace()
+        if classes == 'apple':
+            classes = ['apple']
         if classes is None:
             return cls.CLASSES
+        # if not isinstance(classes, list):
+        #     classes = [cls.CLASSES]
 
         if isinstance(classes, str):
             # take it as a file path
@@ -305,7 +322,8 @@ class Custom3DDataset(Dataset):
                  logger=None,
                  show=False,
                  out_dir=None,
-                 pipeline=None):
+                 pipeline=None,
+                 ckpt_pth=None): ## (shlee) 추가
         """Evaluate.
 
         Evaluation in indoor protocol.
@@ -328,6 +346,7 @@ class Custom3DDataset(Dataset):
             dict: Evaluation results.
         """
         from mmdet3d.core.evaluation import indoor_eval
+        
         assert isinstance(
             results, list), f'Expect results to be list, got {type(results)}.'
         assert len(results) > 0, 'Expect length of results > 0.'
@@ -335,6 +354,8 @@ class Custom3DDataset(Dataset):
         assert isinstance(
             results[0], dict
         ), f'Expect elements in results to be dict, got {type(results[0])}.'
+        
+        # import pdb;pdb.set_trace()
         gt_annos = [info['annos'] for info in self.data_infos]
         label2cat = {i: cat_id for i, cat_id in enumerate(self.CLASSES)}
         ret_dict = indoor_eval(
@@ -344,7 +365,8 @@ class Custom3DDataset(Dataset):
             label2cat,
             logger=logger,
             box_type_3d=self.box_type_3d,
-            box_mode_3d=self.box_mode_3d)
+            box_mode_3d=self.box_mode_3d,
+            ckpt_pth=ckpt_pth) ## ## (shlee) 추가
         if show:
             self.show(results, out_dir, pipeline=pipeline)
 

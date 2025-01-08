@@ -1,10 +1,118 @@
 # Copyright (c) OpenMMLab. All rights reserved.
 import mmcv
 import numpy as np
+import torch
 
 from mmdet3d.core.points import BasePoints, get_points_type
 from mmdet.datasets.pipelines import LoadAnnotations, LoadImageFromFile
 from ..builder import PIPELINES
+
+
+## TODO ADD MS-ImageLoad Pipeline
+@PIPELINES.register_module()
+class LoadMultiSpectralImageFromFiles(object):
+    """Load multi channel images from a list of separate channel files.
+
+    Expects results['img_filename'] to be a list of filenames.
+
+    Args:
+        to_float32 (bool, optional): Whether to convert the img to float32.
+            Defaults to False.
+        color_type (str, optional): Color type of the file.
+            Defaults to 'unchanged'.
+    """
+
+    def __init__(self, 
+                 to_float32=False, 
+                 color_type='color',
+                 channel_order='bgr',
+                 file_client_args=dict(backend='disk')):
+        self.to_float32 = to_float32
+        self.color_type = color_type
+        self.channel_order = channel_order
+        self.file_client_args = file_client_args.copy()
+        self.file_client = None
+
+    def __call__(self, results):
+        """Call function to load multi-spectral image from files.
+
+        Args:
+            results (dict): Result dict containing multi-view image filenames.
+
+        Returns:
+            dict: The result dict containing the multi-view image data.
+                Added keys and values are described below.
+
+                - filename (str): multi-spectral image filenames.
+                - img (np.ndarray): multi-spectral image arrays.
+                - img_shape (tuple[int]): Shape of multi-spectral image arrays.
+                - ori_shape (tuple[int]): Shape of original image arrays.
+                - pad_shape (tuple[int]): Shape of padded image arrays.
+                - scale_factor (float): Scale factor.
+                - img_norm_cfg (dict): Normalization configuration of images.
+        """
+        
+        ## TODO LOAD Multispectral img
+        filename = [results['img_info']['filename'], results['img_info']['filename'].replace('image', 'lwir')]
+        # img is of shape (h, w, c, num_views)
+        # img = np.stack(
+        #     [mmcv.imread(name, self.color_type) for name in filename], axis=-1)
+
+        if self.file_client is None:
+            self.file_client = mmcv.FileClient(**self.file_client_args)
+            
+        img_bytes = self.file_client.get(filename[0])
+        visible = mmcv.imfrombytes(
+            img_bytes, flag=self.color_type, channel_order=self.channel_order)
+        if self.to_float32:
+            visible = visible.astype(np.float32)
+        
+        try:    
+            img_bytes = self.file_client.get(filename[1])
+        except:
+            img_bytes = self.file_client.get(filename[0])
+        lwir = mmcv.imfrombytes(
+            img_bytes, flag=self.color_type, channel_order=self.channel_order)
+        if self.to_float32:
+            lwir = lwir.astype(np.float32)
+        
+        # visible = mmcv.imread(filename[0], self.color_type)
+        # # lwir = mmcv.imread(filename[1], self.color_type)
+          
+        # if self.to_float32:
+        #     img = img.astype(np.float32)
+            
+            
+        results['filename'] = filename[0]
+        # unravel to list, see `DefaultFormatBundle` in formatting.py
+        # which will transpose each image separately and then stack into array
+        # results['img'] = [img[..., i] for i in range(img.shape[-1])]
+        results['img'] = visible
+        results['ori_filename'] = filename[0]
+        results['img_shape'] = visible.shape
+        results['ori_shape'] = visible.shape
+        
+        results['lwir'] = lwir
+    
+        results['img_fields'] = ['img', 'lwir']
+        # Set initial values for default meta_keys
+        # results['pad_shape'] = img.shape
+        # results['scale_factor'] = 1.0
+        
+        # num_channels = 1 if len(img.shape) < 3 else img.shape[2]
+        # results['img_norm_cfg'] = dict(
+        #     mean=np.zeros(num_channels, dtype=np.float32),
+        #     std=np.ones(num_channels, dtype=np.float32),
+        #     to_rgb=False)
+        return results
+
+    def __repr__(self):
+        """str: Return a string that describes the module."""
+        repr_str = self.__class__.__name__
+        repr_str += f'(to_float32={self.to_float32}, '
+        repr_str += f"color_type='{self.color_type}')"
+        return repr_str
+
 
 
 @PIPELINES.register_module()
@@ -428,11 +536,13 @@ class LoadPointsFromFile(object):
 
     def __init__(self,
                  coord_type,
+                 dataset_type,
                  load_dim=6,
                  use_dim=[0, 1, 2],
                  shift_height=False,
                  use_color=False,
-                 file_client_args=dict(backend='disk')):
+                 file_client_args=dict(backend='disk'),
+                 use_noise=False):
         self.shift_height = shift_height
         self.use_color = use_color
         if isinstance(use_dim, int):
@@ -441,11 +551,16 @@ class LoadPointsFromFile(object):
             f'Expect all used dimensions < {load_dim}, got {use_dim}'
         assert coord_type in ['CAMERA', 'LIDAR', 'DEPTH']
 
+        #import pdb;pdb.set_trace()
         self.coord_type = coord_type
         self.load_dim = load_dim
         self.use_dim = use_dim
         self.file_client_args = file_client_args.copy()
         self.file_client = None
+        self.dataset_type = dataset_type
+        #import pdb;pdb.set_trace()
+        ## tjkim ~ use noise
+        self.use_noise = use_noise
 
     def _load_points(self, pts_filename):
         """Private function to load point clouds data.
@@ -459,8 +574,14 @@ class LoadPointsFromFile(object):
         if self.file_client is None:
             self.file_client = mmcv.FileClient(**self.file_client_args)
         try:
+            #import pdb;pdb.set_trace()
             pts_bytes = self.file_client.get(pts_filename)
-            points = np.frombuffer(pts_bytes, dtype=np.float32)
+            if self.dataset_type=="SmartFarmDataset" or self.dataset_type=='AgricultureDataset' or self.dataset_type=='PappleDataset':
+                #import pdb;pdb.set_trace()
+                points = np.frombuffer(pts_bytes, dtype=np.float64)
+            else:
+                points = np.frombuffer(pts_bytes, dtype=np.float32)
+    
         except ConnectionError:
             mmcv.check_file_exist(pts_filename)
             if pts_filename.endswith('.npy'):
@@ -468,6 +589,7 @@ class LoadPointsFromFile(object):
             else:
                 points = np.fromfile(pts_filename, dtype=np.float32)
 
+        #import pdb;pdb.set_trace()
         return points
 
     def __call__(self, results):
@@ -484,6 +606,7 @@ class LoadPointsFromFile(object):
         """
         pts_filename = results['pts_filename']
         points = self._load_points(pts_filename)
+        #import pdb;pdb.set_trace()
         points = points.reshape(-1, self.load_dim)
         points = points[:, self.use_dim]
         attribute_dims = None
@@ -496,6 +619,7 @@ class LoadPointsFromFile(object):
                  np.expand_dims(height, 1), points[:, 3:]], 1)
             attribute_dims = dict(height=3)
 
+        #import pdb;pdb.set_trace()
         if self.use_color:
             assert len(self.use_dim) >= 6
             if attribute_dims is None:
@@ -506,10 +630,124 @@ class LoadPointsFromFile(object):
                     points.shape[1] - 2,
                     points.shape[1] - 1,
                 ]))
+        
+        # if self.dataset_type=='SmartFarmDataset':
+        #     # pp = 0.7
+        #     # b = 0.4
+        #     # d = points[:, 2]
+        #     points = np.delete(points, np.abs(points[:,2])>6., axis=0)
+        #     points = np.delete(points, np.abs(points[:,-3])>255., axis=0)
+        #     points = np.delete(points, np.abs(points[:,-2])>255., axis=0)
+        #     points = np.delete(points, np.abs(points[:,-1])>255., axis=0)
+        #     ## normalize image
+        #     # import pdb;pdb.set_trace()
+        #     #points[:,-3:] /= 256
+        if self.use_noise:
+            pp = 0.7
+            b = 0.4
+            d = points[:, 2]
+            depth_mm = (d - d.min())/((d.max())-d.min())
+            np.random.seed(777)
+            p_de = np.random.rand(d.shape[0])
+            points[p_de*b < pp*depth_mm, 2] = 0
+            # points = np.delete(points, points[:,2]==0, axis=0)
+            
+        
+        
+        
 
         points_class = get_points_type(self.coord_type)
+        
+        #import pdb;pdb.set_trace()
+
+        if self.dataset_type=="SmartFarmDataset" or 'AgricultureDataset' or 'PappleDataset':
+            points[:, :3] *= 10
+            
+        #import pdb;pdb.set_trace()
+        # if self.dataset_type=="AgricultureDataset":
+
+        #     point_cloud_rgb = points
+            
+        #     valid_mask = ~np.isnan(point_cloud_rgb).any(axis=1) & ~np.isinf(point_cloud_rgb).any(axis=1)
+        #     filtered_valid_points = point_cloud_rgb[valid_mask]
+            
+        #     filtered_valid_points[:, :3] *= 10
+            
+        #     points = filtered_valid_points
+
+        #     # 2. XYZ 좌표가 -20 ~ 20 사이에 포함되는 포인트만 남기기
+        #     # xyz_mask = (filtered_valid_points[:, 0] >= -20) & (filtered_valid_points[:, 0] <= 20) & \
+        #     #         (filtered_valid_points[:, 1] >= -20) & (filtered_valid_points[:, 1] <= 20) & \
+        #     #         (filtered_valid_points[:, 2] >= -20) & (filtered_valid_points[:, 2] <= 20)
+
+        #     # points = filtered_valid_points[xyz_mask]
+
+        #     # # NaN, Inf, -Inf 값을 포함하지 않는 행을 선택
+        #     # mask = np.all(np.isfinite(points[:, :3]), axis=1)
+        #     # points = points[mask]
+            
+        #     # points = points.astype(np.float64)
+
+        #     # # 원하는 범위의 최소값과 최대값
+        #     # target_min = -20.597500801086426
+        #     # target_max = 11.442445516586304
+
+        #     # # 현재 데이터의 최소값과 최대값 계산
+        #     # current_min = np.min(points[:, :3], axis=0)
+        #     # current_max = np.max(points[:, :3], axis=0)
+
+        #     # # 현재 범위의 범위값 계산
+        #     # range_vals = current_max - current_min
+
+        #     # # 범위값이 inf이거나 0인 경우 처리
+        #     # range_vals[np.isinf(range_vals)] = 1  # inf는 1로 설정하여 나중에 나누기 연산에서 문제를 피합니다
+        #     # range_vals[range_vals == 0] = 1  # 모든 값이 동일한 경우, 범위를 1로 설정
+
+        #     # # 데이터 정규화 (0에서 1 사이로)
+        #     # normalized_points = (points[:, :3] - current_min) / range_vals
+
+        #     # # 원하는 범위로 스케일링
+        #     # scaled_points = normalized_points * (target_max - target_min) + target_min
+
+        #     # # 원본 데이터의 포인트 업데이트
+        #     # points[:, :3] = scaled_points
+            
+        #     ####################################################################################
+            
+        #     # RGB 값 추출
+        #     rgb = points[:, 3:6]
+
+        #     rgb = np.nan_to_num(rgb, nan=1e-6, posinf=1e-6, neginf=1e-6)
+        #     #print(f"1단계 처리 후 0의 개수: {(rgb == 0).sum()}")
+
+        #     # 2단계: 값 클리핑
+        #     rgb = np.clip(rgb, -1e6, 1e6)
+        #     #print(f"2단계 처리 후 0의 개수: {(rgb == 0).sum()}")
+
+        #     # 3단계: RGB 값의 최소 및 최대 찾기
+        #     min_vals = np.min(rgb, axis=0)
+        #     max_vals = np.max(rgb, axis=0)
+
+        #     # 4단계: 범위 계산 및 정규화
+        #     epsilon = 1e-3
+        #     range_vals = max_vals - min_vals
+        #     range_vals = np.where(range_vals < epsilon, epsilon, range_vals)
+        #     normalized_rgb = (rgb - min_vals) / range_vals
+        #     #print(f"4단계 처리 후 0의 개수: {(normalized_rgb == 0).sum()}")
+
+        #     # 5단계: NaN 및 Inf 값 처리
+        #     normalized_rgb = np.nan_to_num(normalized_rgb, nan=1e-6, posinf=1, neginf=1)
+        #     normalized_rgb[normalized_rgb == 0] = 1e-6
+        #     #print(f"최종 0의 개수: {(normalized_rgb == 0).sum()}")
+
+        #     # Replace the original RGB values in points with the normalized values
+        #     points[:, 3:6] = normalized_rgb
+            
+        #import pdb;pdb.set_trace()
+        
         points = points_class(
             points, points_dim=points.shape[-1], attribute_dims=attribute_dims)
+        
         results['points'] = points
 
         return results
@@ -611,6 +849,7 @@ class LoadAnnotations3D(LoadAnnotations):
         """
         results['gt_bboxes_3d'] = results['ann_info']['gt_bboxes_3d']
         results['bbox3d_fields'].append('gt_bboxes_3d')
+        
         return results
 
     def _load_bboxes_depth(self, results):
@@ -730,6 +969,7 @@ class LoadAnnotations3D(LoadAnnotations):
         if self.with_seg_3d:
             results = self._load_semantic_seg_3d(results)
 
+        #import pdb;pdb.set_trace()
         return results
 
     def __repr__(self):

@@ -72,6 +72,8 @@ def set_random_seed(seed, deterministic=False):
     if deterministic:
         torch.backends.cudnn.deterministic = True
         torch.backends.cudnn.benchmark = False
+    torch.use_deterministic_algorithms(True)
+
 
 
 def train_segmentor(model,
@@ -204,6 +206,7 @@ def train_detector(model,
 
     runner_type = 'EpochBasedRunner' if 'runner' not in cfg else cfg.runner[
         'type']
+
     data_loaders = [
         build_mmdet_dataloader(
             ds,
@@ -268,7 +271,7 @@ def train_detector(model,
         optimizer_config = OptimizerHook(**cfg.optimizer_config)
     else:
         optimizer_config = cfg.optimizer_config
-
+    
     # register hooks
     runner.register_training_hooks(
         cfg.lr_config,
@@ -316,6 +319,7 @@ def train_detector(model,
         runner.resume(cfg.resume_from)
     elif cfg.load_from:
         runner.load_checkpoint(cfg.load_from)
+
     runner.run(data_loaders, cfg.workflow)
 
 

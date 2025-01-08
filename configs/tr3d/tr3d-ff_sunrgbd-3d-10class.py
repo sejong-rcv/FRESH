@@ -18,7 +18,7 @@ model = dict(
         out_channels=256,
         num_outs=5),
     backbone=dict(
-        type='MinkFFResNet',
+        type='MinkFFDinoResNet',
         in_channels=3,
         max_channels=128,
         depth=34,
@@ -72,6 +72,7 @@ img_norm_cfg = dict(
 train_pipeline = [
     dict(
         type='LoadPointsFromFile',
+        dataset_type='SUNRGBDDataset',
         coord_type='DEPTH',
         shift_height=False,
         use_color=True,
@@ -106,6 +107,7 @@ train_pipeline = [
 test_pipeline = [
     dict(
         type='LoadPointsFromFile',
+        dataset_type='SUNRGBDDataset',
         coord_type='DEPTH',
         shift_height=False,
         use_color=True,

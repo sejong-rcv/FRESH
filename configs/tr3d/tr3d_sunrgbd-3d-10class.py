@@ -47,9 +47,15 @@ dataset_type = 'SUNRGBDDataset'
 data_root = 'data/sunrgbd/'
 class_names = ('bed', 'table', 'sofa', 'chair', 'toilet', 'desk', 'dresser',
                'night_stand', 'bookshelf', 'bathtub')
+
+img_norm_cfg = dict(
+    mean=[103.530, 116.280, 123.675], std=[1.0, 1.0, 1.0], to_rgb=False)
+
+# class_names = ('cup', 'bottle', 'computer', 'book', 'board', 'bowl', 'oven', 'printer', 'box', 'lamp')
 train_pipeline = [
     dict(
         type='LoadPointsFromFile',
+        dataset_type='SUNRGBDDataset',
         coord_type='DEPTH',
         shift_height=False,
         use_color=True,
@@ -75,6 +81,7 @@ train_pipeline = [
 test_pipeline = [
     dict(
         type='LoadPointsFromFile',
+        dataset_type='SUNRGBDDataset',
         coord_type='DEPTH',
         shift_height=False,
         use_color=True,

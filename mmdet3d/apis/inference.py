@@ -224,6 +224,8 @@ def inference_multi_modality_detector(model, pcd, image, ann_file):
     # forward the model
     with torch.no_grad():
         result = model(return_loss=False, rescale=True, **data)
+        
+    import pdb;pdb.set_trace()
     return result, data
 
 

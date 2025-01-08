@@ -33,6 +33,7 @@ def _draw_points(points,
     Returns:
         tuple: points, color of each point.
     """
+    #import pdb;pdb.set_trace()
     vis.get_render_option().point_size = points_size  # set points size
     if isinstance(points, torch.Tensor):
         points = points.cpu().numpy()
@@ -392,6 +393,7 @@ class Visualizer(object):
 
         # draw points
         if points is not None:
+            import pdb;pdb.set_trace()
             self.pcd, self.points_colors = _draw_points(
                 points, self.o3d_visualizer, points_size, point_color, mode)
 

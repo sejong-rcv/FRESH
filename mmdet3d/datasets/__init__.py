@@ -8,6 +8,10 @@ from .kitti_mono_dataset import KittiMonoDataset
 from .lyft_dataset import LyftDataset
 from .nuscenes_dataset import NuScenesDataset
 from .nuscenes_mono_dataset import NuScenesMonoDataset
+from .smartfarm_dataset import SmartFarmDataset
+from .small_sunrgbd_dataset import SUNRGBDSMALLDataset
+from .agriculture_dataset import AgricultureDataset
+from .papple_dataset import PappleDataset
 # yapf: disable
 from .pipelines import (AffineResize, BackgroundPointsFilter, GlobalAlignment,
                         GlobalRotScaleTrans, IndoorPatchPointSample,
@@ -28,6 +32,10 @@ from .sunrgbd_dataset import SUNRGBDDataset
 from .utils import get_loading_pipeline
 from .waymo_dataset import WaymoDataset
 
+## TODO tjkim
+from .fog_sunrgbd_dataset import FOG_SUNRGBDDataset
+from .ms_sunrgbd_dataset import MS_SUNRGBDDataset
+
 __all__ = [
     'KittiDataset', 'KittiMonoDataset', 'build_dataloader', 'DATASETS',
     'build_dataset', 'NuScenesDataset', 'NuScenesMonoDataset', 'LyftDataset',
@@ -41,5 +49,7 @@ __all__ = [
     'LoadPointsFromMultiSweeps', 'WaymoDataset', 'BackgroundPointsFilter',
     'VoxelBasedPointSampler', 'get_loading_pipeline', 'RandomDropPointsColor',
     'RandomJitterPoints', 'ObjectNameFilter', 'AffineResize',
-    'RandomShiftScale', 'LoadPointsFromDict', 'PIPELINES'
+    'RandomShiftScale', 'LoadPointsFromDict', 'PIPELINES', 'FOG_SUNRGBDDataset',
+    'MS_SUNRGBDDataset', 'SmartFarmDataset', 'SUNRGBDSMALLDataset', 'AgricultureDataset',
+    'PappleDataset'
 ]

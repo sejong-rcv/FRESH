@@ -1,15 +1,17 @@
 # Copyright (c) OpenMMLab. All rights reserved.
-from mmdet.models.losses import FocalLoss, SmoothL1Loss, binary_cross_entropy
+from mmdet.models.losses import FocalLoss, SmoothL1Loss, binary_cross_entropy, BalancedL1Loss
 from .axis_aligned_iou_loss import AxisAlignedIoULoss, axis_aligned_iou_loss
 from .chamfer_distance import ChamferDistance, chamfer_distance
 from .multibin_loss import MultiBinLoss
 from .paconv_regularization_loss import PAConvRegularizationLoss
 from .rotated_iou_loss import RotatedIoU3DLoss
 from .uncertain_smooth_l1_loss import UncertainL1Loss, UncertainSmoothL1Loss
-
+from .ldam_loss_for_agriculture_imbalance import LDAMLossAgriculture ## shlee added
+from .stem_direction_loss import Angle3DLoss
 __all__ = [
     'FocalLoss', 'SmoothL1Loss', 'binary_cross_entropy', 'ChamferDistance',
     'chamfer_distance', 'axis_aligned_iou_loss', 'AxisAlignedIoULoss',
     'PAConvRegularizationLoss', 'UncertainL1Loss', 'UncertainSmoothL1Loss',
-    'MultiBinLoss', 'RotatedIoU3DLoss'
+    'MultiBinLoss', 'RotatedIoU3DLoss', 'LDAMLossAgriculture', 'BalancedL1Loss',
+    'Angle3DLoss'
 ]

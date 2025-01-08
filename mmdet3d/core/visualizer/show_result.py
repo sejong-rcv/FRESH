@@ -120,6 +120,7 @@ def show_result(points,
     if show:
         from .open3d_vis import Visualizer
 
+        #import pdb;pdb.set_trace()
         vis = Visualizer(points)
         if pred_bboxes is not None:
             if pred_labels is None:
@@ -316,7 +317,8 @@ def show_multi_modality_result(img,
                 proj_mat,
                 img_metas,
                 color=pred_bbox_color)
-        mmcv.imshow(show_img, win_name='project_bbox3d_img', wait_time=0)
+        #mmcv.imshow(show_img, win_name='project_bbox3d_img', wait_time=0)
+        mmcv.imwrite(show_img, osp.join(result_path, f'{filename}_img.png'))
 
     if img is not None:
         mmcv.imwrite(img, osp.join(result_path, f'{filename}_img.png'))
