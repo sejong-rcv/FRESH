@@ -29,28 +29,44 @@
  * GPU : NVIDA A100 (40G)
 
 ### Installation 
-1. Install mmcv-full (v1.6.0)
+1. Docker
+   -  Build Image & Make Container
+     
+        ```
+        cd docker
+        make docker-make
+        ```
+
+   - Run Container
+     
+        ```
+        cd ..
+        nvidia-docker run -it --name freshnet -v $PWD:/workspace -p 8888:8888 -e NVIDIA_VISIBLE_DEVICES=all --shm-size=32G freshnet:maintainer /bin/bash
+        ```
+    
    
+2. Install mmcv-full (v1.6.0)
+
    - We used version 1.6.0, but you should check the [documentation](https://mmcv.readthedocs.io/en/v1.7.0/get_started/installation.html) and install it according to the version of CUDA and torch you use.
      
        ```
        pip install mmcv-full==1.6.0 -f https://download.openmmlab.com/mmcv/dist/cu113/torch1.12/index.html
        ```
 
-2. Install mmdet (v0.24.0), mmsegmentation (v0.24.1)
+3. Install mmdet (v0.24.0), mmsegmentation (v0.24.1)
    ```
    pip install mmdet==0.24.0
    pip install mmsegmentation==0.24.1
    ```
 
-3. Clone the FRESHNet repository.
+4. Clone the FRESHNet repository.
    ```
    git clone https://github.com/sejong-rcv/FRESH.git
    cd mmdetection3d
    pip install -v -e .
    ```
 
-4. Install MinkowskiEngine
+5. Install MinkowskiEngine
    - Users will also need to install Minkowski as the sparse convolution backend. If necessary please Follow the original [installation guide](https://github.com/NVIDIA/MinkowskiEngine#installation):
      
      ```
