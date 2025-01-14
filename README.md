@@ -146,3 +146,20 @@ We referenced the repos below for the code.
 * [3D-Metrics](https://github.com/M-G-A/3D-Metrics.git)
 
 
+---
+
+## Citation
+If our work is useful in your research, please consider citing our paper:
+```
+@article{son2024fresh,
+  title={FRESH: Fusion-Based 3D Apple Recognition via Estimating Stem Direction Heading},
+  author={Son, Geonhwa and Lee, Seunghyeon and Choi, Yukyung},
+  journal={Agriculture},
+  volume={14},
+  number={12},
+  pages={2161},
+  year={2024},
+  publisher={MDPI}
+}
+```
+
